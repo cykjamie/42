@@ -1,0 +1,86 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: chapark <chapark@student.42.fr>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2019/07/08 16:36:39 by chapark           #+#    #+#              #
+#    Updated: 2019/10/16 23:01:47 by chapark          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+NAME=ft_ssl
+CFLAGS= -Wall -Wextra -Werror #-fsanitize=address -g
+# -Werror
+# -fsanitize=address
+IFLAGS= -I include -I ft_printf
+# include ft_printf folder
+FT_PRINTF=ft_printf/libftprintf.a
+# a file here ???
+LFLAGS=-Lft_printf/ -lftprintf
+# naming this way lft_printf instead of libft_printf.a (exempting ib and .a)
+
+# SRC=$(wildcard src/*.c)
+
+# OBJ=$(SRC:src/%.c=obj/%.o)
+SRC=src/ft_ssl.c src/parse.c src/md5.c src/md5_helper.c src/sha256.c src/sha256_helper.c src/stdin.c src/md5_hashing.c src/endian.c src/print.c src/sha256_hashing.c src/md5_print.c
+
+OBJ=obj/ft_ssl.o obj/parse.o obj/md5.o obj/md5_helper.o obj/sha256.o obj/sha256_helper.o obj/stdin.o obj/md5_hashing.o obj/endian.o obj/print.o obj/sha256_hashing.o obj/md5_print.o
+OBJ_FUNC= obj/parse.o obj/md5.o obj/md5_helper.o obj/sha256.o obj/sha256_helper.o obj/stdin.o obj/md5_hashing.o obj/endian.o obj/print.o obj/sha256_hashing.o obj/md5_print.o
+OBJ_TEST= unit_tests/padding.o unit_tests/tests.o unit_tests/block_test.o 
+
+$(NAME): $(OBJ) $(FT_PRINTF)
+	gcc $(CFLAGS) $(IFLAGS) $(LFLAGS) -o $(NAME) $(OBJ)
+
+
+	# gcc $(CFLAGS) $(IFLAGS) $(LFLAGS) -o $(NAME) $(OBJ)
+
+# -C call make from ft_printf
+# mv ft_printf/libft.a $(NAME)
+#ar rc $(NAME) $(OBJ)
+#ranlib $(NAME)
+
+unit_tests/%.o: unit_tests/%.c
+	gcc $(IFLAGS) -I unit_tests -o $@ -c $<
+
+obj/%.o: src/%.c
+	mkdir -p obj
+	gcc $(CFLAGS) -o $@ -c $<
+	# gcc $(CFLAGS) -o $@ -c $<
+
+# if there's not obj folder, make that folder
+# gcc $(CFLAGS) -c $(SRC)
+
+# $@is about the first one which here it is $(OBJ), $< is regarding second one which is $(SRC)
+# check if there is something changed in chain reaction
+
+$(FT_PRINTF):
+	make -C ft_printf
+
+all: $(NAME)
+
+clean:
+	rm -f $(OBJ) $(OBJ_TEST)
+	make clean -C ft_printf
+
+#test: $(NAME)
+	#gcc -g ft_ssl.a -I include -I ft_printf ft_printf/libftprintf.a src/ft_ssl.c -o ft_ssl
+	# gcc -g ft_ssl.a -I include -I ft_printf ft_printf/libftprintf.a test.c -o test
+	# this is giving a excutable file name test after making the file. changed it to ft_ssl so that the executable is called that
+
+test: $(OBJ_TEST) $(OBJ_FUNC) $(FT_PRINTF)
+	gcc $(IFLAGS) -I unit_tests $(LFLAGS) $(OBJ_FUNC) $(OBJ_TEST) -o tester
+	./tester
+
+fclean: clean
+	rm -f $(NAME) tester
+	make fclean -C ft_printf
+
+#rm -f test
+# maybe need to change name of this to clean ft_ssl instead?
+
+re: fclean all
+
+# order is important, use tab not space
+# when making excutable, doesn't make library. Only make library when using seprate testing file%
